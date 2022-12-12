@@ -94,6 +94,7 @@ void CombinedSort(T* First, T* Last, Compare Comp)
         if(Last - First < Breakpoint)
         {
             InsertSort(First, Last, Comp);
+            return;
         }
         
         p = Partition(First, Last, Comp);
@@ -117,7 +118,7 @@ int main()
     FileOutput.open("output.txt");
     FileOutput << "Size QuickSort InsertSort CombinedSort";
     FileOutput << std::endl;
-    const int TestCount = 10000000;
+    const int TestCount = 1000000;
     std::default_random_engine RandomEngine(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<int> RandomIntGenerator;
     for(int i = 2; i < 100; ++i)
@@ -152,7 +153,7 @@ int main()
             InsertSortRuntime += InsertionSortEnd - InsertionSortStart;
 
             std::chrono::steady_clock::time_point CombinedSortStart = std::chrono::steady_clock::now();
-            InsertSort(CombinedSortArray, CombinedSortArray + i - 1, [] (int a, int b) {return a < b ;});
+            CombinedSort(CombinedSortArray, CombinedSortArray + i - 1, [] (int a, int b) {return a < b ;});
             std::chrono::steady_clock::time_point CombinedSortEnd = std::chrono::steady_clock::now();
             CombinedSortRuntime += CombinedSortEnd - CombinedSortStart;
         }
