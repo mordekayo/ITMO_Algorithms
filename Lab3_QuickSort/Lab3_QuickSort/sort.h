@@ -1,7 +1,7 @@
-#define Breakpoint 42
+#define Breakpoint 20
 
 template<typename T, typename Compare>
-T PivotSelection(T* First, T* Last, Compare Comp)
+T* PivotSelection(T* First, T* Last, Compare Comp)
 {
     T* Medium = First + (Last - First ) / 2;
     if (Comp(*Last, *First))
@@ -16,7 +16,7 @@ T PivotSelection(T* First, T* Last, Compare Comp)
     {
         std::swap(*Medium, *Last);
     }
-    return *Medium;
+    return Medium;
 }
 
 template<typename T, typename Compare>
@@ -24,19 +24,26 @@ T* Partition(T* First, T* Last, Compare Comp)
 {
     T* FirstCopy = First;
     T* LastCopy = Last;
-    T Pivot = PivotSelection(FirstCopy, LastCopy, Comp);
+    T* Pivot = PivotSelection(FirstCopy, LastCopy, Comp);
+
+    std::swap(*Pivot, *Last);
+    
+    Pivot = Last;
+    --LastCopy;
+    
     while(true)
     {
-        while(Comp(*FirstCopy, Pivot))
+        while(Comp(*FirstCopy, *Pivot) && FirstCopy != Last)
         {
             ++FirstCopy;
         }
-        while(Comp(Pivot, *LastCopy))
+        while(Comp(*Pivot, *LastCopy) && LastCopy != First)
         {
             --LastCopy;
         }
         if (FirstCopy >= LastCopy)
         {
+            std::swap(*Pivot, *FirstCopy);
             return LastCopy;
         }
         std::swap(*FirstCopy, *LastCopy);
@@ -102,71 +109,6 @@ void CombinedSort(T* First, T* Last, Compare Comp)
         else
         {
             CombinedSort(p + 1, Last, Comp);
-            Last = p;
-        }
-    }
-}
-template<typename T, typename Compare>
-T* pPivotSelection(T* First, T* Last, Compare Comp)
-{
-    T* Medium = First + (Last - First ) / 2;
-    if (Comp(*Last, *First))
-    {
-        std::swap(*First, *Last);
-    }
-    if (Comp(*Medium, *First))
-    {
-        std::swap(*First, *Medium); 
-    }
-    if (Comp(*Last, *Medium))
-    {
-        std::swap(*Medium, *Last);
-    }
-    return Medium;
-}
-
-template<typename T, typename Compare>
-T* pPartition(T* First, T* Last, Compare Comp)
-{
-    T* FirstCopy = First;
-    T* LastCopy = Last;
-    T Pivot = pPivotSelection(FirstCopy, LastCopy, Comp);
-    while(true)
-    {
-        while(Comp(*FirstCopy, Pivot))
-        {
-            ++FirstCopy;
-        }
-        while(Comp(Pivot, *LastCopy))
-        {
-            --LastCopy;
-        }
-        if (FirstCopy >= LastCopy)
-        {
-            return LastCopy;
-        }
-        std::swap(*FirstCopy, *LastCopy);
-        ++FirstCopy;
-        --LastCopy;
-    }
-}
-
-template<typename T, typename Compare>
-void pQuickSort(T* First, T* Last, Compare Comp)
-{
-    T* p;
-    while (Last - First > 0)
-    {
-        p = Partition(First, Last, Comp);
-
-        if((p - First) < (Last - p + 1))
-        {
-            pQuickSort(First, p, Comp);
-            First = p + 1;
-        }
-        else
-        {
-            pQuickSort(p + 1, Last, Comp);
             Last = p;
         }
     }

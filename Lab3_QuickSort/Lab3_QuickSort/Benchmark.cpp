@@ -4,13 +4,13 @@
 #include <fstream>
 #include "sort.h"
 
-int Benchmark()
+void Benchmark()
 {
     std::ofstream FileOutput;
     FileOutput.open("output.txt");
     FileOutput << "Size QuickSort InsertSort CombinedSort";
     FileOutput << std::endl;
-    const int TestCount = 1000000;
+    const int TestCount = 100000000;
     std::default_random_engine RandomEngine(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<int> RandomIntGenerator;
     for(int i = 2; i < 100; ++i)
@@ -67,5 +67,7 @@ int Benchmark()
 
 int main()
 {
+    Benchmark();
+    
     return 0;
 }

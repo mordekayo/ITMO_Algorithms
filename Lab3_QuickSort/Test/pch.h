@@ -28,8 +28,7 @@ public:
     {
         
     }
-
-    /*
+    
     ComplexClass(const ComplexClass& rhs) = delete;
     ComplexClass& operator=(const ComplexClass& other) = delete;
 
@@ -39,8 +38,7 @@ public:
         Integer = rhs.Integer;
     };
     ComplexClass& operator=(ComplexClass&& rhs) = default;
-
-    */
+    
     std::string String;
     int Integer;
 };
