@@ -10,7 +10,7 @@ void Benchmark()
     FileOutput.open("output.txt");
     FileOutput << "Size QuickSort InsertSort CombinedSort";
     FileOutput << std::endl;
-    const int TestCount = 100000000;
+    const int TestCount = 10000;
     std::default_random_engine RandomEngine(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<int> RandomIntGenerator;
     for(int i = 2; i < 100; ++i)
