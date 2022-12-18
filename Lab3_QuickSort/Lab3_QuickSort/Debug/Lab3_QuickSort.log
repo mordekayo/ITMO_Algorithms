@@ -1,7 +1,0 @@
-﻿  Lab3_QuickSort.cpp
-C:\Projects\ITMO_Algorithms\Lab3_QuickSort\Lab3_QuickSort\Lab3_QuickSort.cpp(122,102): warning C4244: 'argument': conversion from '_Rep' to 'unsigned int', possible loss of data
-          with
-          [
-              _Rep=std::chrono::system_clock::rep
-          ]
-  Lab3_QuickSort.vcxproj -> C:\Projects\ITMO_Algorithms\Lab3_QuickSort\Debug\Lab3_QuickSort.exe
