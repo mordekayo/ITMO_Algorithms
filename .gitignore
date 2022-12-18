@@ -357,3 +357,8 @@ baseq2/config.cfg
 .idea/.idea.quake2/.idea/.name
 .idea/.idea.quake2/.idea/projectSettingsUpdater.xml
 .idea/.idea.quake2/.idea/workspace.xml
+*.vcxproj
+*.sln
+*.xml
+*.pdb
+*.filters
