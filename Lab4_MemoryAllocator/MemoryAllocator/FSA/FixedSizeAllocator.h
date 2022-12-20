@@ -24,13 +24,13 @@ public:
     FixedSizeAllocator(FixedSizeAllocator&&) = delete;
     FixedSizeAllocator& operator=(const FixedSizeAllocator&&) = delete;
     
-    void Init(size_t InBlockSize, size_t InBlocksPerPage);
+    void Init(int InBlockSize, int InBlocksPerPage);
 
     void Destroy();
 
-    void* Alloc(size_t Size);
+    void* Alloc();
 
-    void Free(void* p);
+    void Free(void* Block) const;
 
 #ifdef _DEBUG
     
@@ -46,6 +46,6 @@ private:
     
     [[nodiscard]] FSAMemoryPage* AllocPage() const;
 
-    size_t BlockSize = 16;
-    size_t BlocksPerPage = 10;
+    int BlockSize = 16;
+    int BlocksPerPage = 10;
 };

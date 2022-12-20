@@ -1,6 +1,7 @@
 #include "FixedSizeAllocator.h"
 
 #include <cassert>
+#include <iostream>
 
 FixedSizeAllocator::FixedSizeAllocator()
 {
@@ -13,7 +14,7 @@ FixedSizeAllocator::~FixedSizeAllocator()
 #endif
 }
 
-void FixedSizeAllocator::Init(size_t InBlockSize, size_t InBlocksPerPage)
+void FixedSizeAllocator::Init(int InBlockSize, int InBlocksPerPage)
 {
     BlockSize = InBlockSize;
     BlocksPerPage = InBlocksPerPage;
@@ -38,35 +39,62 @@ void FixedSizeAllocator::Destroy()
     PageListHead = nullptr;
 }
 
-void* FixedSizeAllocator::Alloc(size_t Size)
+void* FixedSizeAllocator::Alloc()
 {
+    
 #ifdef _DEBUG
-    assert(PageListHead == nullptr);
+    assert(PageListHead != nullptr);
 #endif
 
-    auto Block = PageListHead->Buffer;
+    auto Page = PageListHead;
+    while(Page != nullptr)
+    {
+        if(Page->FreeListHead != -1)
+        {
+            const auto Block = static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->FreeListHead * BlockSize);
+            Page->FreeListHead = *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->FreeListHead * BlockSize));
+            return Block;
+        }
+        Page = Page->NextPage;
+    }
+
+    const auto NewPage = AllocPage();
+    NewPage->NextPage = PageListHead;
+    PageListHead = NewPage;
     
-    return nullptr;
+    return PageListHead->Buffer;
 }
 
-void FixedSizeAllocator::Free(void* p)
+void FixedSizeAllocator::Free(void* Block) const
 {
 #ifdef _DEBUG
-    assert(PageListHead == nullptr);
+    assert(PageListHead != nullptr);
 #endif
+
+    auto Page = PageListHead;
+    while(Page != nullptr)
+    {
+        if(Block >= Page->Buffer && Block <= static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlocksPerPage - 1) * BlockSize)
+        {
+            *static_cast<int*>(Block) = Page->FreeListHead;
+            Page->FreeListHead = static_cast<int>(static_cast<char*>(Block) - static_cast<char*>(Page->Buffer)) / BlockSize;
+            return;
+        }
+        Page = Page->NextPage;
+    }
 }
 
 void FixedSizeAllocator::DumpStat() const
 {
 #ifdef _DEBUG
-    assert(PageListHead == nullptr);
+    assert(PageListHead != nullptr);
 #endif
 }
 
 void FixedSizeAllocator::DumpBlocks() const
 {
 #ifdef _DEBUG
-    assert(PageListHead == nullptr);
+    assert(PageListHead != nullptr);
 #endif
 }
 
@@ -77,5 +105,13 @@ FixedSizeAllocator::FSAMemoryPage* FixedSizeAllocator::AllocPage() const
 
     Page->Buffer = reinterpret_cast<char*>(Page) + sizeof(FSAMemoryPage);
     Page->FreeListHead = 0;
+
+    for(int i = 0; i < BlocksPerPage - 1; ++i)
+    {
+        *static_cast<int*>(Page->Buffer) = i + 1;
+    }
+
+    *static_cast<int*>(Page->Buffer) = -1;
+    
     return Page;
 }

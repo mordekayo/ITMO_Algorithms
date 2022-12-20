@@ -1,14 +1,14 @@
 #pragma once
 #include "../ProtoAllocator.h"
 
-class CoalesceAllocator : ProtoAllocator
+class CoalesceAllocator
 {
 
 public:
     
     CoalesceAllocator();
 
-    ~CoalesceAllocator() override;
+    ~CoalesceAllocator();
 
     //We cannot copy allocators
     CoalesceAllocator(const CoalesceAllocator&) = delete;
@@ -16,19 +16,19 @@ public:
     CoalesceAllocator(CoalesceAllocator&&) = delete;
     CoalesceAllocator& operator=(const CoalesceAllocator&&) = delete;
     
-    void Init() override;
+    void Init();
 
-    void Destroy() override;
+    void Destroy();
 
     void* Alloc(size_t Size);
 
-    void Free(void* p) override;
+    void Free(void* p);
 
 #ifdef _DEBUG
     
-    void DumpStat() const override; 
+    void DumpStat() const; 
 
-    void DumpBlocks() const override;
+    void DumpBlocks() const;
 
 #endif
 

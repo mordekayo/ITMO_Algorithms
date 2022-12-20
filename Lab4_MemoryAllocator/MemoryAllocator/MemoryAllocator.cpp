@@ -25,31 +25,31 @@ void* MemoryAllocator::Alloc(size_t Size)
 {
     if(Size < 16)
     {
-        return FSA16.Alloc(Size);
+        return FSA16.Alloc();
     }
     if(Size < 32)
     {
-        return FSA32.Alloc(Size);
+        return FSA32.Alloc();
     }
     if(Size < 64)
     {
-        return FSA64.Alloc(Size);
+        return FSA64.Alloc();
     }
     if(Size < 128)
     {
-        return FSA128.Alloc(Size);
+        return FSA128.Alloc();
     }
     if(Size < 256)
     {
-        return FSA256.Alloc(Size);
+        return FSA256.Alloc();
     }
     if(Size < 512)
     {
-        return FSA512.Alloc(Size);
+        return FSA512.Alloc();
     }   
     if(Size < 10 * MB )
     {
-        return FSA16.Alloc(Size);
+        return FSA16.Alloc();
     }
 
     void* p = VirtualAlloc(nullptr, Size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);

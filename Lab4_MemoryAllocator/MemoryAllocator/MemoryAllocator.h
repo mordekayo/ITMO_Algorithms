@@ -1,7 +1,7 @@
 #pragma once
 #include <windows.h>
-#include "SecondaryAllocators/FixedSizeAllocator.h"
-#include "SecondaryAllocators/CoalesceAllocator.h"
+#include "FSA/FixedSizeAllocator.h"
+#include "Coalesce/CoalesceAllocator.h"
 
 class MemoryAllocator
 {
