@@ -22,7 +22,7 @@ void CoalesceAllocator::Destroy()
 
 void* CoalesceAllocator::Alloc(size_t Size)
 {
-    
+    return nullptr;
 }
 
 void CoalesceAllocator::Free(void* p)

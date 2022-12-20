@@ -13,10 +13,12 @@ MemoryAllocator::~MemoryAllocator()
 
 void MemoryAllocator::Init()
 {
+    
 }
 
 void MemoryAllocator::Destroy()
 {
+    
 }
 
 void* MemoryAllocator::Alloc(size_t Size)
@@ -89,6 +91,7 @@ void MemoryAllocator::Free(void* p)
     */
     
     bool res = VirtualFree(p, 0, MEM_RELEASE);
+    /*
     assert(res && "Poiner out of bounds");
     if (res) {
         for (auto it = OSBlocks.begin(); it < OSBlocks.end(); it++) {
@@ -98,6 +101,7 @@ void MemoryAllocator::Free(void* p)
             }
         }
     }
+    */
 }
 
 void MemoryAllocator::DumpStat() const

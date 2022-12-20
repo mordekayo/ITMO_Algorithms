@@ -9,21 +9,26 @@ ProtoAllocator::ProtoAllocator()
 
 ProtoAllocator::~ProtoAllocator()
 {
+#ifdef _DEBUG
+    assert(!bIsInitialized);
+#endif
 }
 
 void ProtoAllocator::Init()
 {
-    
+    bIsInitialized = true;
 }
 
 void ProtoAllocator::Destroy()
 {
-    
+    bIsInitialized = false;
 }
 
 void* ProtoAllocator::Alloc(size_t Size)
 {
-    assert(bIsInitialized);
+    std::cout << "Proto Alloc" << std::endl;
+
+    return nullptr;
 }
 
 void ProtoAllocator::Free(void* p)

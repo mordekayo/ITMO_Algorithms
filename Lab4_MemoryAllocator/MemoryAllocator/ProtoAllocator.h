@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include <Windows.h>
 
 class ProtoAllocator
 {
@@ -16,7 +16,7 @@ public:
     ProtoAllocator(ProtoAllocator&&) = delete;
     ProtoAllocator& operator=(const ProtoAllocator&&) = delete;
     
-    virtual void Init();
+    void Init();
 
     virtual void Destroy();
 
@@ -34,5 +34,5 @@ public:
 
 private:
 
-    bool bIsInitialized;
+
 };

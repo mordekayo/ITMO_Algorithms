@@ -1,5 +1,5 @@
 #pragma once
-#include "ProtoAllocator.h"
+#include "../ProtoAllocator.h"
 
 class CoalesceAllocator : ProtoAllocator
 {
@@ -20,7 +20,7 @@ public:
 
     void Destroy() override;
 
-    void* Alloc(size_t Size) override;
+    void* Alloc(size_t Size);
 
     void Free(void* p) override;
 
