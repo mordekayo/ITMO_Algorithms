@@ -1,4 +1,5 @@
 #include "MemoryAllocator.h"
+#include <Windows.h>
 constexpr size_t MB = 1048576;
 
 MemoryAllocator::MemoryAllocator()
@@ -23,31 +24,31 @@ void MemoryAllocator::Destroy()
 
 void* MemoryAllocator::Alloc(size_t Size)
 {
-    if(Size < 16)
+    if(Size <= 16)
     {
         return FSA16.Alloc();
     }
-    if(Size < 32)
+    if(Size <= 32)
     {
         return FSA32.Alloc();
     }
-    if(Size < 64)
+    if(Size <= 64)
     {
         return FSA64.Alloc();
     }
-    if(Size < 128)
+    if(Size <= 128)
     {
         return FSA128.Alloc();
     }
-    if(Size < 256)
+    if(Size <= 256)
     {
         return FSA256.Alloc();
     }
-    if(Size < 512)
+    if(Size <= 512)
     {
         return FSA512.Alloc();
     }   
-    if(Size < 10 * MB )
+    if(Size <= 10 * MB )
     {
         return FSA16.Alloc();
     }

@@ -13,6 +13,7 @@ int main()
     std::cout << *P1 << std::endl;
     *P2 = 10;
     std::cout << *P2 << std::endl;
+    Allocator.Free(P2);
     Allocator.Destroy();
     return 0;
 }

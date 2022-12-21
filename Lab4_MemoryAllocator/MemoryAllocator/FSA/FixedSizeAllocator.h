@@ -1,6 +1,4 @@
 #pragma once
-#include "../ProtoAllocator.h"
-
 
 class FixedSizeAllocator
 {
@@ -11,10 +9,11 @@ private:
 
         void* Buffer = nullptr;
         int FreeListHead = 0;
+        int InitizalizedBlocks = 0;
     };
 public:
 
-    FixedSizeAllocator();
+    FixedSizeAllocator() = default;
 
     ~FixedSizeAllocator();
 
@@ -30,7 +29,7 @@ public:
 
     void* Alloc();
 
-    void Free(void* Block) const;
+    void Free(void* Block);
 
 #ifdef _DEBUG
     
@@ -48,4 +47,11 @@ private:
 
     int BlockSize = 16;
     int BlocksPerPage = 10;
+
+#ifdef _DEBUG
+    
+    size_t AllocCalls = 0;
+    size_t FreeCalls = 0;
+
+#endif
 };

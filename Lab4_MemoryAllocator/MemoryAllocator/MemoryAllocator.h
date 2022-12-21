@@ -1,5 +1,4 @@
 #pragma once
-#include <windows.h>
 #include "FSA/FixedSizeAllocator.h"
 #include "Coalesce/CoalesceAllocator.h"
 
