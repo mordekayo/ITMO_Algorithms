@@ -6,10 +6,9 @@ private:
     struct FSAMemoryPage
     {
         FSAMemoryPage* NextPage = nullptr;
-
-        void* Buffer = nullptr;
         int FreeListHead = 0;
         int InitizalizedBlocks = 0;
+        void* Buffer = nullptr;
     };
 public:
 

@@ -13,6 +13,9 @@ FixedSizeAllocator::~FixedSizeAllocator()
 
 void FixedSizeAllocator::Init(int InBlockSize, int InBlocksPerPage)
 {
+#ifdef _DEBUG
+    assert(InBlockSize > 0 && InBlocksPerPage > 0);
+#endif
     BlockSize = InBlockSize;
     BlocksPerPage = InBlocksPerPage;
     PageListHead = AllocPage();
@@ -38,7 +41,6 @@ void FixedSizeAllocator::Destroy()
 
 void* FixedSizeAllocator::Alloc()
 {
-    
 #ifdef _DEBUG
     assert(PageListHead != nullptr);
     AllocCalls += 1;
@@ -108,12 +110,12 @@ void FixedSizeAllocator::DumpBlocks() const
 
 FixedSizeAllocator::FSAMemoryPage* FixedSizeAllocator::AllocPage() const
 {
-    const auto Page = static_cast<FSAMemoryPage*>(VirtualAlloc(nullptr, static_cast<long long int>(BlockSize * BlocksPerPage) + sizeof(FSAMemoryPage),
+    const auto Page = static_cast<FSAMemoryPage*>(VirtualAlloc(nullptr, sizeof(FSAMemoryPage) + static_cast<size_t>(BlockSize * BlocksPerPage),
         MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
-
-    Page->Buffer = reinterpret_cast<char*>(Page) + sizeof(FSAMemoryPage);
+    
     Page->FreeListHead = -1;
     Page->InitizalizedBlocks = 0;
+    Page->Buffer = reinterpret_cast<char*>(Page) + sizeof(FSAMemoryPage) + sizeof(int) + sizeof(int);
     
     return Page;
 }
