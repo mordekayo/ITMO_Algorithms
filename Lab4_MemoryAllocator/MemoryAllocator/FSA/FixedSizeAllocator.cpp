@@ -88,6 +88,7 @@ void* FixedSizeAllocator::Alloc()
             const auto NewPage = AllocPage();
             NewPage->NextPage = PageListHead;
             PageListHead = NewPage;
+            Page = NewPage;
         }
     }
 }
@@ -137,11 +138,11 @@ void FixedSizeAllocator::CheckValid() const
         {
             for(int j = 0; j < BlockSize; ++j)
             {
-                assert(0x007E == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize - BlockSize + j)) && "Memory corruption");
+                assert(0x007E == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((i * 3 + 1) * BlockSize - BlockSize + j)) && "Memory corruption");
             }
             for(int j = 0; j < BlockSize; ++j)
             {
-                assert(0x007C == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize + BlockSize + j)) && "Memory corruption");
+                assert(0x007C == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((i * 3 + 1) * BlockSize + BlockSize + j)) && "Memory corruption");
             }
         }
         Page = Page->NextPage;
