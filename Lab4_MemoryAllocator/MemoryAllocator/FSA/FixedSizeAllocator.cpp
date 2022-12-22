@@ -113,24 +113,9 @@ void FixedSizeAllocator::Free(void* Block)
     }
 }
 
-#ifdef _DEBUG
-
-
-void FixedSizeAllocator::DumpStat() const
-{
-    assert(PageListHead != nullptr);
-    
-}
-
-void FixedSizeAllocator::DumpBlocks() const
-{
-
-    assert(PageListHead != nullptr);
-
-}
-
 void FixedSizeAllocator::CheckValid() const
 {
+#ifdef _DEBUG
     auto Page = PageListHead;
     while(Page != nullptr)
     {
@@ -147,6 +132,23 @@ void FixedSizeAllocator::CheckValid() const
         }
         Page = Page->NextPage;
     }
+#endif
+}
+
+#ifdef _DEBUG
+
+
+void FixedSizeAllocator::DumpStat() const
+{
+    assert(PageListHead != nullptr);
+    
+}
+
+void FixedSizeAllocator::DumpBlocks() const
+{
+
+    assert(PageListHead != nullptr);
+
 }
 #endif
 

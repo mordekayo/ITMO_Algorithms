@@ -30,13 +30,13 @@ public:
 
     void Free(void* Block);
 
+    void CheckValid() const;
+
 #ifdef _DEBUG
     
     void DumpStat() const;
 
     void DumpBlocks() const;
-
-    void CheckValid() const;   
 
 #endif
 

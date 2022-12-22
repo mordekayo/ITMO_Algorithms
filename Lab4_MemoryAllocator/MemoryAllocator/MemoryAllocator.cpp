@@ -103,11 +103,3 @@ void MemoryAllocator::Free(void* p)
     }
     */
 }
-
-void MemoryAllocator::DumpStat() const
-{
-}
-
-void MemoryAllocator::DumpBlocks() const
-{
-}
