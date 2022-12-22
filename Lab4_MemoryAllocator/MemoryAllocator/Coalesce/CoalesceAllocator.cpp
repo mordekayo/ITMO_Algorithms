@@ -48,6 +48,7 @@ void* CoalesceAllocator::Alloc(size_t Size)
     {
         if(Page->FreeListHead != -1)
         {
+            /*
             //Determine block size
             auto Block = static_cast<CoalesceMetaData*>(Page->Buffer + Page->FreeListHead);
             while(true)
@@ -65,6 +66,7 @@ void* CoalesceAllocator::Alloc(size_t Size)
                 }
                 Block = (reinterpret_cast<char*>(Block) + Block->NextFreeBlock * sizeof(char*));
             }
+            */
         }
         Page = Page->NextPage;
         if(Page == nullptr)
@@ -110,16 +112,16 @@ CoalesceAllocator::CoalesceMemoryPage* CoalesceAllocator::AllocPage() const
 
 #ifdef _DEBUG
     
-    *static_cast<long long*>(Page->Buffer) = LeftDebugFlag;
-    static_cast<CoalesceMetaData*>(Page->Buffer + sizeof(long long))->PrevBlock = nullptr;
-    static_cast<CoalesceMetaData*>(Page->Buffer + sizeof(long long))->NextBlock = nullptr;
-    static_cast<CoalesceMetaData*>(Page->Buffer + sizeof(long long))->NextFreeBlock = -1;
-    *static_cast<long long*>(Page->Buffer + PageSize - sizeof(long long)) = RightDebugFlag;
+    // *static_cast<long long*>(Page->Buffer) = LeftDebugFlag;
+    // static_cast<CoalesceMetaData*>(Page->Buffer + sizeof(long long))->PrevBlock = nullptr;
+    // static_cast<CoalesceMetaData*>(Page->Buffer + sizeof(long long))->NextBlock = nullptr;
+    // static_cast<CoalesceMetaData*>(Page->Buffer + sizeof(long long))->NextFreeBlock = -1;
+    // *static_cast<long long*>(Page->Buffer + PageSize - sizeof(long long)) = RightDebugFlag;
     
 #else
     static_cast<CoalesceMetaData*>(Page->Buffer)->PrevBlock = nullptr;
     static_cast<CoalesceMetaData*>(Page->Buffer)->NextBlock = nullptr;
-    static_cast<CoalesceMetaData*>(Page->Buffer)->NextFreeBlock = -1;
+    //static_cast<CoalesceMetaData*>(Page->Buffer)->NextFreeBlock = -1;
 #endif
     
     return Page;

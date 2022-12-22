@@ -36,6 +36,8 @@ public:
 
     void DumpBlocks() const;
 
+    void CheckValid() const;   
+
 #endif
 
 private:

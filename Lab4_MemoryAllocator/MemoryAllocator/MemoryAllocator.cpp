@@ -1,6 +1,5 @@
 #include "MemoryAllocator.h"
 #include <Windows.h>
-constexpr size_t MB = 1048576;
 
 MemoryAllocator::MemoryAllocator()
 {

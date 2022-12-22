@@ -57,10 +57,29 @@ void* FixedSizeAllocator::Alloc()
         }
         if(Page->InitizalizedBlocks < BlocksPerPage)
         {
+#ifdef _DEBUG
+            const auto Block = static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((Page->InitizalizedBlocks * 3 + 1) * BlockSize);
+            const auto LeftDebugBlock = Block - BlockSize;
+            for(int i = 0; i < BlockSize; ++i)
+            {
+                *(LeftDebugBlock + i) = 0x007E;
+            }
+            const auto RightDebugBlock = Block + BlockSize;
+            for(int i = 0; i < BlockSize; ++i)
+            {
+                *(RightDebugBlock + i) = 0x007C;
+            }
+#else
             const auto Block = static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize);
+#endif 
             Page->InitizalizedBlocks += 1;
+#ifdef _DEBUG
+            *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((Page->InitizalizedBlocks * 3 + 1) * BlockSize)) = -1;
+            Page->FreeListHead = Page->InitizalizedBlocks * 3 + 1;
+#else
             *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize)) = -1;
             Page->FreeListHead = Page->InitizalizedBlocks;
+#endif
             return Block;
         }
         Page = Page->NextPage;
@@ -94,6 +113,8 @@ void FixedSizeAllocator::Free(void* Block)
 }
 
 #ifdef _DEBUG
+
+
 void FixedSizeAllocator::DumpStat() const
 {
     assert(PageListHead != nullptr);
@@ -106,12 +127,37 @@ void FixedSizeAllocator::DumpBlocks() const
     assert(PageListHead != nullptr);
 
 }
+
+void FixedSizeAllocator::CheckValid() const
+{
+    auto Page = PageListHead;
+    while(Page != nullptr)
+    {
+        for(int i = 0; i < Page->InitizalizedBlocks; ++i)
+        {
+            for(int j = 0; j < BlockSize; ++j)
+            {
+                assert(0x007E == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize - BlockSize + j)) && "Memory corruption");
+            }
+            for(int j = 0; j < BlockSize; ++j)
+            {
+                assert(0x007C == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize + BlockSize + j)) && "Memory corruption");
+            }
+        }
+        Page = Page->NextPage;
+    }
+}
 #endif
 
 FixedSizeAllocator::FSAMemoryPage* FixedSizeAllocator::AllocPage() const
 {
-    const auto Page = static_cast<FSAMemoryPage*>(VirtualAlloc(nullptr, sizeof(FSAMemoryPage) + static_cast<size_t>(BlockSize * BlocksPerPage),
+#ifdef _DEBUG
+    const auto Page = static_cast<FSAMemoryPage*>(VirtualAlloc(nullptr, sizeof(FSAMemoryPage) +sizeof(int) + sizeof(int) + static_cast<size_t>(BlockSize * (BlocksPerPage * 3)),
+            MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+#else
+    const auto Page = static_cast<FSAMemoryPage*>(VirtualAlloc(nullptr, sizeof(FSAMemoryPage) + sizeof(int) + sizeof(int) + static_cast<size_t>(BlockSize * BlocksPerPage),
         MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+#endif
     
     Page->FreeListHead = -1;
     Page->InitizalizedBlocks = 0;
