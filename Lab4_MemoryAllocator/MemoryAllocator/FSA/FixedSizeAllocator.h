@@ -28,7 +28,7 @@ public:
 
     void* Alloc();
 
-    void Free(void* Block);
+    bool Free(void* Block);
 
     void CheckValid() const;
 
@@ -54,5 +54,7 @@ private:
     size_t AllocCalls = 0;
     size_t FreeCalls = 0;
 
+    static constexpr char LeftDebugFlag = 0x007E;
+    static constexpr char RightDebugFlag = 0x007C;
 #endif
 };

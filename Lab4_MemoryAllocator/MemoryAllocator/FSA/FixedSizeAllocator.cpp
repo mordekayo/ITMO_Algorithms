@@ -62,12 +62,12 @@ void* FixedSizeAllocator::Alloc()
             const auto LeftDebugBlock = Block - BlockSize;
             for(int i = 0; i < BlockSize; ++i)
             {
-                *(LeftDebugBlock + i) = 0x007E;
+                *(LeftDebugBlock + i) = LeftDebugFlag;
             }
             const auto RightDebugBlock = Block + BlockSize;
             for(int i = 0; i < BlockSize; ++i)
             {
-                *(RightDebugBlock + i) = 0x007C;
+                *(RightDebugBlock + i) = RightDebugFlag;
             }
 #else
             const auto Block = static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize);
@@ -75,10 +75,10 @@ void* FixedSizeAllocator::Alloc()
             Page->InitizalizedBlocks += 1;
 #ifdef _DEBUG
             *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((Page->InitizalizedBlocks * 3 + 1) * BlockSize)) = -1;
-            Page->FreeListHead = Page->InitizalizedBlocks * 3 + 1;
+            Page->FreeListHead = -1;
 #else
             *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize)) = -1;
-            Page->FreeListHead = Page->InitizalizedBlocks;
+            Page->FreeListHead = -1;
 #endif
             return Block;
         }
@@ -93,7 +93,7 @@ void* FixedSizeAllocator::Alloc()
     }
 }
 
-void FixedSizeAllocator::Free(void* Block)
+bool FixedSizeAllocator::Free(void* Block)
 {
 #ifdef _DEBUG
     assert(PageListHead != nullptr);
@@ -103,14 +103,24 @@ void FixedSizeAllocator::Free(void* Block)
     auto Page = PageListHead;
     while(Page != nullptr)
     {
-        if(Block >= Page->Buffer && Block <= static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlocksPerPage - 1) * BlockSize)
+#ifdef _DEBUG
+        if(Block >= static_cast<char*>(Page->Buffer) + BlockSize && Block <= static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlocksPerPage - 2) * BlockSize)
         {
+            auto LeftDebugValue = *(static_cast<char*>(Block) - BlockSize);
+            assert(LeftDebugValue == LeftDebugFlag && "Incorrect pointer to block");
+            auto RightDebugValue = *(static_cast<char*>(Block) + BlockSize);
+            assert(RightDebugValue == RightDebugFlag && "Incorrect pointer to block");
+#else
+            if(Block >= Page->Buffer && Block <= static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlocksPerPage - 1) * BlockSize)
+            {
+#endif
             *static_cast<int*>(Block) = Page->FreeListHead;
             Page->FreeListHead = static_cast<int>(static_cast<char*>(Block) - static_cast<char*>(Page->Buffer)) / BlockSize;
-            return;
+            return true;
         }
         Page = Page->NextPage;
     }
+        return false;
 }
 
 void FixedSizeAllocator::CheckValid() const
@@ -123,11 +133,11 @@ void FixedSizeAllocator::CheckValid() const
         {
             for(int j = 0; j < BlockSize; ++j)
             {
-                assert(0x007E == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((i * 3 + 1) * BlockSize - BlockSize + j)) && "Memory corruption");
+                assert(LeftDebugFlag == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((i * 3 + 1) * BlockSize - BlockSize + j)) && "Memory corruption");
             }
             for(int j = 0; j < BlockSize; ++j)
             {
-                assert(0x007C == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((i * 3 + 1) * BlockSize + BlockSize + j)) && "Memory corruption");
+                assert(RightDebugFlag == *(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((i * 3 + 1) * BlockSize + BlockSize + j)) && "Memory corruption");
             }
         }
         Page = Page->NextPage;
@@ -141,14 +151,60 @@ void FixedSizeAllocator::CheckValid() const
 void FixedSizeAllocator::DumpStat() const
 {
     assert(PageListHead != nullptr);
+
+        auto Page = PageListHead;
+        int PageNumber = 0;
+        int FreeBlocks = 0;
+        while(Page != nullptr)
+        {
+            PageNumber += 1;
+            int BlockIndex = Page->FreeListHead;
+            while(BlockIndex != -1)
+            {
+                FreeBlocks += 1;
+                BlockIndex = *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlockIndex * BlockSize));
+            }
+            FreeBlocks += BlocksPerPage - Page->InitizalizedBlocks;
+            Page = Page->NextPage;
+            std::cout << std::endl;
+        }
+
+        std::cout << "Allocated " << PageNumber << " pages of virtual memory" << std::endl;
+        std::cout << "Each page size is " << sizeof(FSAMemoryPage) + sizeof(int) + sizeof(int) + static_cast<size_t>(BlockSize * (BlocksPerPage * 3)) << std::endl;
+        std::cout << "Free blocks: " << FreeBlocks << std::endl;
+        std::cout << "Busy blocks: " << BlocksPerPage - FreeBlocks << std::endl << std::endl;
     
 }
 
 void FixedSizeAllocator::DumpBlocks() const
 {
-
     assert(PageListHead != nullptr);
 
+        auto Page = PageListHead;
+        while(Page != nullptr)
+        {
+            std::cout << "-----------Page 0----------" << std::endl << std::endl;
+            for(int i = 0; i < BlocksPerPage; ++i)
+            {
+                int BlockToFindIndex = i * 3 + 1;
+                int BlockIndex = Page->FreeListHead;
+                bool bIsFree = false;
+                while(BlockIndex != -1)
+                {
+                    if(BlockToFindIndex == BlockIndex)
+                    {
+                        bIsFree = true;
+                    }
+                    BlockIndex = *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlockIndex * BlockSize));
+                }
+                if(bIsFree != true && BlockToFindIndex < Page->InitizalizedBlocks * 3 + 1)
+                {
+                    std::cout << "Address: " << static_cast<void*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlockToFindIndex * BlockSize)) << " Size: "<< BlockSize << std::endl;
+                }
+            }
+            Page = Page->NextPage;
+            std::cout << std::endl;
+        }
 }
 #endif
 

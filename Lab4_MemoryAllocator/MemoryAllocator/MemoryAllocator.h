@@ -1,4 +1,6 @@
 #pragma once
+#include <map>
+
 #include "FSA/FixedSizeAllocator.h"
 #include "Coalesce/CoalesceAllocator.h"
 
@@ -7,7 +9,7 @@ class MemoryAllocator
 
 public:
     
-    MemoryAllocator();
+    MemoryAllocator() = default;
 
     virtual ~MemoryAllocator();
 
@@ -23,7 +25,7 @@ public:
 
     virtual void* Alloc(size_t Size);
 
-    virtual void Free(void* p);
+    virtual void Free(void* Block);
 
 #ifdef _DEBUG
     
@@ -35,6 +37,8 @@ public:
 
 private:
 
+    std::map<void*, size_t> OSBlocks;
+    bool Initizalized = false;
     FixedSizeAllocator FSA16, FSA32, FSA64, FSA128, FSA256, FSA512;
     CoalesceAllocator CoalesceA;
     

@@ -1,10 +1,5 @@
 #pragma once
 #include <climits>
-#include <cstdint>
-
-constexpr size_t MB = 1048576;
-constexpr long long LeftDebugFlag = LLONG_MIN;
-constexpr long long RightDebugFlag = LLONG_MAX;
 
 class CoalesceAllocator
 {
@@ -13,7 +8,7 @@ private:
     struct CoalesceMemoryPage
     {
         CoalesceMemoryPage* NextPage = nullptr;
-        int FreeListHead = 0;
+        void* FreeListHead = nullptr;
         void* Buffer = nullptr;
     };
 
@@ -21,10 +16,16 @@ private:
     {
         CoalesceMetaData* PrevBlock;
         CoalesceMetaData* NextBlock;
-        CoalesceMetaData* NextFreeBlock;
-        CoalesceMetaData* PrevFreeBlock;
+        size_t BlockSize;
+        bool bIsFree;
     };
-    
+
+    struct FreeListNode
+    {
+        FreeListNode* PrevFreeListBlock;
+        FreeListNode* NextFreeListBlock;
+    };
+
 public:
     
     CoalesceAllocator() = default;
@@ -37,13 +38,15 @@ public:
     CoalesceAllocator(CoalesceAllocator&&) = delete;
     CoalesceAllocator& operator=(const CoalesceAllocator&&) = delete;
     
-    void Init(size_t PageSize);
+    void Init(size_t PageSize = 10 * MB);
 
     void Destroy();
 
     void* Alloc(size_t Size);
 
-    void Free(void* p);
+    bool Free(void* Block);
+
+    void CheckValid() const;
 
 #ifdef _DEBUG
     
@@ -60,6 +63,12 @@ private:
     [[nodiscard]] CoalesceMemoryPage* AllocPage() const;
 
     size_t PageSize;
-    size_t MinimumBlockSize;
+#ifdef _DEBUG
+    size_t MinimumBlockSize = sizeof(CoalesceMetaData) + sizeof(FreeListNode) + sizeof(long long) * 2;
+
+    static constexpr size_t MB = 1048576;
+    static constexpr long long LeftDebugFlag = LLONG_MIN;
+    static constexpr long long RightDebugFlag = LLONG_MAX;
+#endif
 };
 
