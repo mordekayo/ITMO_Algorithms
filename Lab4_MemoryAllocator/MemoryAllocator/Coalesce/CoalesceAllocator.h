@@ -26,6 +26,7 @@ private:
         FreeListNode* NextFreeListBlock;
     };
 
+    static const size_t MB = 1048576;
 public:
     
     CoalesceAllocator() = default;
@@ -37,6 +38,7 @@ public:
     CoalesceAllocator& operator=(const CoalesceAllocator&) = delete;
     CoalesceAllocator(CoalesceAllocator&&) = delete;
     CoalesceAllocator& operator=(const CoalesceAllocator&&) = delete;
+
     
     void Init(size_t PageSize = 10 * MB);
 
@@ -44,7 +46,7 @@ public:
 
     void* Alloc(size_t Size);
 
-    bool Free(void* Block);
+    bool Free(void* Block) const;
 
     void CheckValid() const;
 
@@ -65,8 +67,7 @@ private:
     size_t PageSize;
 #ifdef _DEBUG
     size_t MinimumBlockSize = sizeof(CoalesceMetaData) + sizeof(FreeListNode) + sizeof(long long) * 2;
-
-    static constexpr size_t MB = 1048576;
+    
     static constexpr long long LeftDebugFlag = LLONG_MIN;
     static constexpr long long RightDebugFlag = LLONG_MAX;
 #endif

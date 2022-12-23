@@ -21,7 +21,9 @@ void MemoryAllocator::Init()
     FSA256.Init(256, 10);
     FSA512.Init(512, 10);
     CoalesceA.Init();
+#ifdef _DEBUG
     Initizalized = true;
+#endif
 }
 
 void MemoryAllocator::Destroy()
@@ -36,7 +38,9 @@ void MemoryAllocator::Destroy()
     FSA256.Destroy();
     FSA512.Destroy();
     CoalesceA.Destroy();
+#ifdef _DEBUG
     Initizalized = false;
+#endif
 }
 
 void* MemoryAllocator::Alloc(size_t Size)
@@ -117,10 +121,9 @@ void MemoryAllocator::Free(void* Block)
     }
     
     bool Result = VirtualFree(Block, 0, MEM_RELEASE);
-    
-    assert(Result && "Poiner out of bounds");
 
 #ifdef _DEBUG
+    assert(Result && "Poiner out of bounds");
     OSBlocks.try_emplace(Block);
 #endif
 }
@@ -129,9 +132,8 @@ void MemoryAllocator::Free(void* Block)
 
 void MemoryAllocator::DumpStat() const
 {
-#ifdef _DEBUG
     assert(Initizalized == true);
-#endif
+
     std::cout << "Fixed size allocator (16 bytes) stat:" <<std::endl;
     FSA16.DumpStat();
     std::cout << "Fixed size allocator (32 bytes) stat:" <<std::endl;
@@ -153,9 +155,8 @@ void MemoryAllocator::DumpStat() const
 
 void MemoryAllocator::DumpBlocks() const
 {
-#ifdef _DEBUG
     assert(Initizalized == true);
-#endif
+
     std::cout << "Fixed size allocator (16 bytes) occupied blocks:" <<std::endl;
     FSA16.DumpBlocks();
     std::cout << "Fixed size allocator (32 bytes) occupied blocks:" <<std::endl;

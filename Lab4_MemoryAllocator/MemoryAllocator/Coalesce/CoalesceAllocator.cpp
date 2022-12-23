@@ -112,7 +112,7 @@ void* CoalesceAllocator::Alloc(size_t Size)
     }
 }
 
-bool CoalesceAllocator::Free(void* Block)
+bool CoalesceAllocator::Free(void* Block) const
 {
 #ifdef _DEBUG
     assert(PageListHead != nullptr);
@@ -125,16 +125,12 @@ bool CoalesceAllocator::Free(void* Block)
 #ifdef _DEBUG
         if(Block >= static_cast<char*>(Page->Buffer) + sizeof(long long) + sizeof(CoalesceMetaData) && Block <= static_cast<char*>(Page->Buffer) + PageSize - sizeof(long long))
         {
-            const auto LeftDebugFlagValue = *reinterpret_cast<long long*>(static_cast<char*>(Block) - sizeof(CoalesceMetaData) - sizeof(long long));
-            assert(LeftDebugFlagValue == LeftDebugFlag && "Incorrect pointer to block");
-            const auto RightDebugFlagValue = *reinterpret_cast<long long*>(static_cast<char*>(Block) + BlockMeta->BlockSize);
-            assert(RightDebugFlagValue == RightDebugFlag && "Incorrect pointer to block");
+            assert(*reinterpret_cast<long long*>(static_cast<char*>(Block) - sizeof(CoalesceMetaData) - sizeof(long long)) == LeftDebugFlag && "Incorrect pointer to block");
+            assert(*reinterpret_cast<long long*>(static_cast<char*>(Block) + BlockMeta->BlockSize) == RightDebugFlag && "Incorrect pointer to block");
 #else
-            if(Block >= Page->Buffer + sizeof(CoalesceMetaData) && Block <= static_cast<char*>(Page->Buffer) + PageSize - sizeof(CoalesceMetaData))
+            if(Block >= static_cast<char*>(Page->Buffer) + sizeof(CoalesceMetaData) && Block <= static_cast<char*>(Page->Buffer) + PageSize - sizeof(CoalesceMetaData))
             {
 #endif
-                //Coalision
-                
                 if(BlockMeta->PrevBlock != nullptr && BlockMeta->PrevBlock->bIsFree)
                 {
                     const auto PrevBlockMeta = BlockMeta->PrevBlock;
@@ -195,10 +191,8 @@ void CoalesceAllocator::CheckValid() const
             auto Block = reinterpret_cast<CoalesceMetaData*>(static_cast<char*>(Page->Buffer) + sizeof(long long));
             while(Block != nullptr)
             {
-                const auto LeftFlagValue = *reinterpret_cast<long long*>(reinterpret_cast<char*>(Block) - sizeof(long long));
-                assert(LeftFlagValue == LeftDebugFlag && "Memory corruption");
-                const auto RightFlagValue = *reinterpret_cast<long long*>(reinterpret_cast<char*>(Block) + sizeof(CoalesceMetaData) + Block->BlockSize);
-                assert(RightFlagValue == RightDebugFlag && "Memory corruption");
+                assert(*reinterpret_cast<long long*>(reinterpret_cast<char*>(Block) - sizeof(long long)) == LeftDebugFlag && "Memory corruption");
+                assert(*reinterpret_cast<long long*>(reinterpret_cast<char*>(Block) + sizeof(CoalesceMetaData) + Block->BlockSize) == RightDebugFlag && "Memory corruption");
                 Block = Block->NextBlock;
             }
             Page = Page->NextPage;
@@ -240,7 +234,7 @@ void CoalesceAllocator::DumpStat() const
         std::cout << "Allocated " << PageNumber << " pages of virtual memory" << std::endl;
         std::cout << "Each page size is " << sizeof(CoalesceMemoryPage) + sizeof(int) + PageSize << std::endl;
         std::cout << "Free blocks: " << FreeBlocks << std::endl;
-        std::cout << "Busy blocks: " << BusyBlocks << std::endl << std::endl;;
+        std::cout << "Busy blocks: " << BusyBlocks << std::endl << std::endl;
 }
 
 void CoalesceAllocator::DumpBlocks() const
@@ -294,7 +288,7 @@ CoalesceAllocator::CoalesceMemoryPage* CoalesceAllocator::AllocPage() const
     BlockMetaData->NextBlock = nullptr;
     BlockMetaData->BlockSize = PageSize - sizeof(CoalesceMetaData);
         BlockMetaData->bIsFree = true;
-    const auto FreeListNodeInBlock = static_cast<FreeListNode*>(Page->Buffer + sizeof(CoalesceMetaData));
+    const auto FreeListNodeInBlock = reinterpret_cast<FreeListNode*>(static_cast<char*>(Page->Buffer) + sizeof(CoalesceMetaData));
     FreeListNodeInBlock->PrevFreeListBlock = nullptr;
     FreeListNodeInBlock->NextFreeListBlock = nullptr;
 

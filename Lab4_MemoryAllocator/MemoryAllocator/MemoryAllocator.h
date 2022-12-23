@@ -33,12 +33,15 @@ public:
 
     virtual  void DumpBlocks() const;
 
+
 #endif
 
 private:
 
+#ifdef _DEBUG
     std::map<void*, size_t> OSBlocks;
     bool Initizalized = false;
+#endif
     FixedSizeAllocator FSA16, FSA32, FSA64, FSA128, FSA256, FSA512;
     CoalesceAllocator CoalesceA;
     
