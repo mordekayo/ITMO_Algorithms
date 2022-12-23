@@ -75,11 +75,10 @@ void* FixedSizeAllocator::Alloc()
             Page->InitizalizedBlocks += 1;
 #ifdef _DEBUG
             *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>((Page->InitizalizedBlocks * 3 + 1) * BlockSize)) = -1;
-            Page->FreeListHead = -1;
 #else
             *reinterpret_cast<int*>(static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(Page->InitizalizedBlocks * BlockSize)) = -1;
-            Page->FreeListHead = -1;
 #endif
+            Page->FreeListHead = -1;
             return Block;
         }
         Page = Page->NextPage;
@@ -106,10 +105,8 @@ bool FixedSizeAllocator::Free(void* Block)
 #ifdef _DEBUG
         if(Block >= static_cast<char*>(Page->Buffer) + BlockSize && Block <= static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlocksPerPage - 2) * BlockSize)
         {
-            auto LeftDebugValue = *(static_cast<char*>(Block) - BlockSize);
-            assert(LeftDebugValue == LeftDebugFlag && "Incorrect pointer to block");
-            auto RightDebugValue = *(static_cast<char*>(Block) + BlockSize);
-            assert(RightDebugValue == RightDebugFlag && "Incorrect pointer to block");
+            assert(*(static_cast<char*>(Block) - BlockSize) == LeftDebugFlag && "Incorrect pointer to block");
+            assert(*(static_cast<char*>(Block) + BlockSize) == RightDebugFlag && "Incorrect pointer to block");
 #else
             if(Block >= Page->Buffer && Block <= static_cast<char*>(Page->Buffer) + static_cast<ptrdiff_t>(BlocksPerPage - 1) * BlockSize)
             {
